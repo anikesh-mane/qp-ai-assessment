@@ -8,7 +8,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
     
 
-
+# function to load the RAG chain
 def create_rag_chain(llm, retriever):
     """
     Runs the RAG chain with the provided LLM and retriever.
@@ -23,10 +23,10 @@ def create_rag_chain(llm, retriever):
 
     system_prompt = (
     "You are an assistant for question-answering tasks. "
-    "Use the following pieces of retrieved context to answer "
-    "the question. If you don't know the answer, say that you "
-    "don't know. Use three sentences maximum and keep the "
-    "answer concise."
+    "Use the following pieces of retrieved context to answer the question."
+    "If you don't know the answer, say 'I DONT KNOW THE ANSWER TO THIS QUESTION !'."
+    "If you cannot find the answer in the given context, say 'THIS INFO IS NOT PROVIDED IN GIVEN CONTEXT !'"
+    "Use three sentences maximum and keep the answer concise."
     "\n\n"
     "{context}"
     )
@@ -38,8 +38,11 @@ def create_rag_chain(llm, retriever):
         ]
     )
     
-    question_answer_chain = create_stuff_documents_chain(llm, prompt)
-    
-    rag_chain = create_retrieval_chain(retriever, question_answer_chain)
-    
+    try:
+        question_answer_chain = create_stuff_documents_chain(llm, prompt)
+        rag_chain = create_retrieval_chain(retriever, question_answer_chain)
+
+    except Exception as e:
+        raise AppException(e, sys)
+
     return rag_chain

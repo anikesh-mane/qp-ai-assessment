@@ -132,7 +132,6 @@ def add_documents_to_collection(collection_name, client, documents, embed_model,
                 }
             }
 
-
 # Convert collection into retriever
 def convert_collection_to_retriever(collection_name, client, embed_model, sparse_embed_model, k=3):
     '''

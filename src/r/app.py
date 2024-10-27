@@ -6,7 +6,7 @@ from exception import AppException
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
-    
+
 
 # function to load the RAG chain
 def create_rag_chain(llm, retriever):

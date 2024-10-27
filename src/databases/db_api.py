@@ -5,7 +5,7 @@ from logging import logging
 from exception import AppException
 
 from extration.pdf import langchain_pdf_loader
-from databases.milvus import create_or_load_collection, add_documents_to_collection, convert_collection_to_retriever
+from databases.milvus import create_or_load_collection, add_documents_to_collection
 from ai_models.embedding import load_bge_embed_func, load_sparse_embedding_func
 
 from fastapi import APIRouter, UploadFile, Request, HTTPException, File

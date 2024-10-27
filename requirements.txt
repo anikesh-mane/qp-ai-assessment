@@ -12,3 +12,4 @@ langchain-milvus
 FlagEmbedding>=1.2.2
 datasets
 peft
+nltk

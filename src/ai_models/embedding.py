@@ -46,6 +46,9 @@ def load_sparse_embedding_func(data):
     Returns:
     BM25SparseEmbedding object 
     '''
+    import nltk
+    nltk.download('punkt')
+
     text = []
     for doc in data:
         text.append(doc.page_content)

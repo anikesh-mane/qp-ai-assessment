@@ -1,0 +1,14 @@
+python-dotenv
+fastapi
+uvicorn
+pymilvus
+pymilvus[model]
+openai
+pypdf
+langchain
+langchain_community 
+langchain_huggingface 
+langchain-milvus
+FlagEmbedding>=1.2.2
+datasets
+peft

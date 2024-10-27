@@ -124,7 +124,7 @@ def add_documents_to_collection(collection_name, client, documents, embed_model,
     except Exception as e:
         raise AppException(e, sys)
     
-    return {"message": "Document uploaded successfully!",
+    return {"state": client.get_load_state(collection_name = collection_name)['state'],
             "collection_stats": client.get_collection_stats(collection_name = collection_name),
             "time_taken": {
                 "to_create_vectors": end - start,

@@ -10,8 +10,20 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # Create a PDF Loader using the file path
 def langchain_pdf_loader(file_path, chunk_size=1000, overlap=200):
+    '''
+    Loads a PDF file and splits it into chunks.
+
+    Args:
+        file_path: The path to the PDF file.
+        chunk_size: The size of each chunk.
+        overlap: The overlap between chunks.
+    
+    Returns:
+        split_data: A list of Document objects.
+
+    '''
     try:
-        loader = PyPDFLoader(file_path=file_path")
+        loader = PyPDFLoader(file_path=file_path)
         docs = loader.load()
 
         logging.info("PDF loaded")
@@ -51,9 +63,8 @@ def pypdf_loader(file_path, chunk_size=1000, overlap=200):
                 end = len(text)  # Handle the last chunk
             chunks.append(text[start:end])
             start += chunk_size - overlap  # Adjust starting position with overlap
-        
-        return chunks
-
-
-
-
+    
+    except Exception as e:
+        raise AppException(e, sys)
+    
+    return chunks

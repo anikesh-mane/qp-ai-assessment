@@ -1,4 +1,4 @@
-from logger import logging
+from logger import logger
 from exception import AppException
 
 from pymilvus import model
@@ -25,7 +25,7 @@ def load_bge_embed_func(model_name='BAAI/bge-m3', device='cpu', use_fp16=False):
             use_fp16=use_fp16 # Whether to use fp16. `False` for `device='cpu'`.
         )
 
-        logging.info("CREATED BGE-M3 embedding function")
+        logger.info("CREATED BGE-M3 embedding function")
 
         test_embedding = bge_m3_ef.encode_documents(["This is a test"])
         embed_dim = test_embedding["dense"][0].shape
@@ -55,7 +55,7 @@ def load_sparse_embedding_func(data):
     
     try:
         sparse_embedding_func = BM25SparseEmbedding(corpus=text)
-        logging.info("CREATED sparse embedding function")
+        logger.info("CREATED sparse embedding function")
     
     except Exception as e:
         raise AppException(e, sys)

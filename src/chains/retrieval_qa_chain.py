@@ -1,6 +1,6 @@
 import os
 
-from logging import logging
+from logger import logger
 from exception import AppException
 
 from langchain.chains import create_retrieval_chain

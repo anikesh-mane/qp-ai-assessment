@@ -1,4 +1,4 @@
-from logger import logging
+from logger import logger
 from exception import AppException
 
 from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
@@ -39,7 +39,7 @@ def load_hf_llm_model(hf_api_key, model_id="microsoft/Phi-3-mini-4k-instruct", *
 
         chat = ChatHuggingFace(llm=llm, verbose=True)
 
-        logging.info("CREATED HuggingFace Endpoint and Initialized chat model")    
+        logger.info("CREATED HuggingFace Endpoint and Initialized chat model")    
     
     except Exception as e:
         raise AppException(e, sys)

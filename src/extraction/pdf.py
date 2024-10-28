@@ -1,6 +1,6 @@
 import sys
 
-from logging import logging
+from logger import logger
 from exception import AppException
 
 import PyPDF2
@@ -26,7 +26,7 @@ def langchain_pdf_loader(file_path, chunk_size=1000, overlap=200):
         loader = PyPDFLoader(file_path=file_path)
         docs = loader.load()
 
-        logging.info("PDF loaded")
+        logger.info("PDF loaded")
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, 
                                                         chunk_overlap=overlap, 
@@ -34,7 +34,7 @@ def langchain_pdf_loader(file_path, chunk_size=1000, overlap=200):
                                                         )
         splits_data = text_splitter.split_documents(docs)
 
-        logging.info("PDF splitted into chunks")
+        logger.info("PDF splitted into chunks")
     
     except Exception as e:
         raise AppException(e, sys)
@@ -53,7 +53,7 @@ def pypdf_loader(file_path, chunk_size=1000, overlap=200):
             page = pdf_reader.pages[i]
             text.append(page.extract_text())
 
-        logging.info("PDF loaded")
+        logger.info("PDF loaded")
 
         chunks = []
         start = 0

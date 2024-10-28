@@ -1,7 +1,7 @@
 import os
 import time
 
-from logging import logging
+from logger import logger
 from exception import AppException
 
 from pymilvus import MilvusClient, connections, FieldSchema, CollectionSchema, DataType, Collection, utility
@@ -19,7 +19,7 @@ def create_milvus(db_uri="./milvus_demo.db"):
     '''
     client = MilvusClient(uri=db_uri)
 
-    logging.info("CREATED Milvus client")
+    logger.info("CREATED Milvus client")
 
     return client
 
@@ -39,7 +39,7 @@ def create_or_load_collection(collection_name, client, embed_dim):
         if client.has_collection(collection_name):
             client.load_collection(collection_name)
 
-            logging.info(f"LOADED Collection with name {collection_name}")
+            logger.info(f"LOADED Collection with name {collection_name}")
         
         else:
             # Create a collection with a vector field
@@ -77,7 +77,7 @@ def create_or_load_collection(collection_name, client, embed_dim):
                 consistency_level="Strong",
             )
 
-            logging.info(f"CREATED Collection with name {collection_name}")
+            logger.info(f"CREATED Collection with name {collection_name}")
 
     except Exception as e:
         raise AppException(e, sys)
@@ -119,7 +119,7 @@ def add_documents_to_collection(collection_name, client, documents, embed_model,
         client.insert(collection_name=collection_name, data=data)
         insert_end_time = time.time()
 
-        logging.info(f"Added {len(documents)} documents to collection {collection_name}")
+        logger.info(f"Added {len(documents)} documents to collection {collection_name}")
 
     except Exception as e:
         raise AppException(e, sys)
@@ -162,7 +162,7 @@ def convert_collection_to_retriever(collection_name, client, embed_model, sparse
             top_k=k,
         )
 
-        logging.info(f"CONVERTED Collection with name {collection_name} into retriever")
+        logger.info(f"CONVERTED Collection with name {collection_name} into retriever")
     
     except Exception as e:
         raise AppException(e, sys)

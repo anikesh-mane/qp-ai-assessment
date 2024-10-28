@@ -1,10 +1,10 @@
 import os
 import shutil
 
-from logging import logging
+from logger import logger
 from exception import AppException
 
-from extration.pdf import langchain_pdf_loader
+from extraction.pdf import langchain_pdf_loader
 from databases.milvus import create_or_load_collection, add_documents_to_collection
 from ai_models.embedding import load_bge_embed_func, load_sparse_embedding_func
 
@@ -35,11 +35,11 @@ async def upload_file(collection_name: str, request: Request, file: UploadFile =
         with open(f"temp/{file.filename}", "wb") as f:
             shutil.copyfileobj(file.file, f)
 
-        logging.info("File saved to temporary directory")
+        logger.info("File saved to temporary directory")
 
         # Chunk the file
         documents = langchain_pdf_loader(file_path=f"./temp/{file.filename}")
-        logging.info("File chunked")
+        logger.info("File chunked")
 
         # Create an embedding functions
         sparse_embed = load_sparse_embedding_func(documents)
@@ -50,7 +50,7 @@ async def upload_file(collection_name: str, request: Request, file: UploadFile =
                                                         client = request.app.milvus_client, 
                                                         embed_dim = request.app.embed_dim
                                                         )
-        logging.info(collection_status)
+        logger.info(collection_status)
         
         # Push the documents and embeddings to collection
         status = add_documents_to_collection(collection_name = collection_name, 
@@ -63,7 +63,7 @@ async def upload_file(collection_name: str, request: Request, file: UploadFile =
         # Remove the temporary file\
         os.remove(f"./temp/{file.filename}")
         
-        logging.info("Temporary file removed")
+        logger.info("Temporary file removed")
 
         return {"message": "Document uploaded successfully!"} | status
 

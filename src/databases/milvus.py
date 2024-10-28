@@ -10,14 +10,14 @@ from ai_models.embedding import load_bge_embed_func, load_sparse_embedding_func
 
 
 #Create vector store instance
-def create_milvus():
+def create_milvus(db_uri="./milvus_demo.db"):
     '''
     Creates a Milvus client.
 
     Returns:
         A MilvusClient object.
     '''
-    client = MilvusClient(uri="./milvus_demo.db")
+    client = MilvusClient(uri=db_uri)
 
     logging.info("CREATED Milvus client")
 

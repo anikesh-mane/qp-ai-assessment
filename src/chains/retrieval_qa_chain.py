@@ -9,7 +9,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 
 # function to load the RAG chain
-def create_rag_chain(llm, retriever):
+def create_retreival_qa_chain(llm, retriever):
     """
     Runs the RAG chain with the provided LLM and retriever.
 

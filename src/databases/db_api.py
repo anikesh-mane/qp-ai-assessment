@@ -10,7 +10,7 @@ from ai_models.embedding import load_bge_embed_func, load_sparse_embedding_func
 
 from fastapi import APIRouter, UploadFile, Request, HTTPException, File
 
-router = APIRouter()
+db_router = APIRouter()
 
 @router.post("/upload")
 async def upload_file(collection_name: str, request: Request, file: UploadFile = File(...)):
@@ -42,21 +42,21 @@ async def upload_file(collection_name: str, request: Request, file: UploadFile =
         logging.info("File chunked")
 
         # Create an embedding functions
-        bge_m3_ef, embed_dim = load_bge_embed_func()
-        sparse_embed_func = load_sparse_embedding_func(documents)
+        sparse_embed = load_sparse_embedding_func(documents)
+        request.app.sparse_embed = sparse_embed
 
         # initialize milvus collection
         collection_status = create_or_load_collection(collection_name = collection_name, 
                                                         client = request.app.milvus_client, 
-                                                        embed_dim = embed_dim
+                                                        embed_dim = request.app.embed_dim
                                                         )
         logging.info(collection_status)
         
         # Push the documents and embeddings to collection
         status = add_documents_to_collection(collection_name = collection_name, 
                                                 client = request.app.milvus_client, 
-                                                embed_model = bge_m3_ef, 
-                                                sparse_embed_model = sparse_embed_func,
+                                                embed_model = request.app.dense_embed, 
+                                                sparse_embed_model = request.app.sparse_embed,
                                                 documents = documents
                                                 )
 

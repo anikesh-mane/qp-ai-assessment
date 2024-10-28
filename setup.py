@@ -1,5 +1,4 @@
-from setuptools import setup, find_
-packages
+from setuptools import setup, find_packages
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -17,7 +16,7 @@ setup(
     package_dir={'': 'src'},
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",  # Replace with your license
+        "License :: OSI Approved :: GNU General Public Licence v3.0",  # Replace with your license
         "Operating System :: OS Independent",
     ],
     install_requires=[
@@ -38,9 +37,4 @@ setup(
         "nltk",
     ],  # Copied from requirements.txt
     python_requires=">=3.10",  
-    entry_points={
-        'console_scripts': [
-            'qp-chatbot=main:app',  
-        ],
-    },
 )

@@ -1,3 +1,4 @@
+import sys
 from logger import logger
 from exception import AppException
 
@@ -28,12 +29,12 @@ def load_hf_llm_model(hf_api_key, model_id="microsoft/Phi-3-mini-4k-instruct", *
 
         llm = HuggingFaceEndpoint(
             repo_id = model_id,
-            task = model_kwargs.get(task, "text-generation"),
-            max_new_tokens = model_kwargs.get(max_new_tokens, 512),
-            do_sample = model_kwargs.get(do_sample, False),
-            repetition_penalty = model_kwargs.get(repetition_penalty, 1.03),
-            temperature = model_kwargs.get(temperature, 0.7),
-            top_p = model_kwargs.get(top_p, 1.03),
+            task = model_kwargs.get('task', "text-generation"),
+            max_new_tokens = model_kwargs.get('max_new_tokens', 512),
+            do_sample = model_kwargs.get('do_sample', False),
+            repetition_penalty = model_kwargs.get('repetition_penalty', 1.03),
+            temperature = model_kwargs.get('temperature', 0.7),
+            top_p = model_kwargs.get('top_p', 1.03),
             huggingfacehub_api_token = hf_api_key
         )
 

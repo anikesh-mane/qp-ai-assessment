@@ -19,22 +19,6 @@ setup(
         "License :: OSI Approved :: GNU General Public Licence v3.0",  # Replace with your license
         "Operating System :: OS Independent",
     ],
-    install_requires=[
-        "python-dotenv",
-        "fastapi",
-        "uvicorn",
-        "pymilvus",
-        "pymilvus[model]",
-        "openai",
-        "PyPDF2",
-        "langchain",
-        "langchain_community",
-        "langchain_huggingface",
-        "langchain-milvus",
-        "FlagEmbedding>=1.2.2",
-        "datasets",
-        "peft",
-        "nltk",
-    ],  # Copied from requirements.txt
+    install_requires=open('requirements.txt').read().splitlines(),
     python_requires=">=3.10",  
 )

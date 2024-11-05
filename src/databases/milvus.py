@@ -1,12 +1,16 @@
-import os
 import time
+import sys
 
 from logger import logger
 from exception import AppException
 
-from pymilvus import MilvusClient, connections, FieldSchema, CollectionSchema, DataType, Collection, utility
+import os
+for key, value in os.environ.items():
+    if key == 'MILVUS_URI':
+        del os.environ["MILVUS_URI"]
 
-from ai_models.embedding import load_bge_embed_func, load_sparse_embedding_func
+from pymilvus import MilvusClient, FieldSchema, CollectionSchema, DataType, Collection, connections, RRFRanker
+from langchain_milvus.retrievers import MilvusCollectionHybridSearchRetriever
 
 
 #Create vector store instance
@@ -83,12 +87,12 @@ def create_or_load_collection(collection_name, client, embed_dim):
         raise AppException(e, sys)
     
     return {"message": "Collection created successfully!",
-            "collection_status": client.get_load_status(collection_name = collection_name)
+            "collection_status": client.get_load_state(collection_name = collection_name)
             }
 
 
 # Add documents to the collection
-def add_documents_to_collection(collection_name, client, documents, embed_model, sparse_embed_model):
+def add_documents_to_collection(collection_name, client, documents, embed_model, batch_size, sparse_embed_model):
     '''
     Adds documents to the specified Milvus collection.
 
@@ -108,15 +112,27 @@ def add_documents_to_collection(collection_name, client, documents, embed_model,
         data = []
         for doc in documents:
             data.append({
-                "dense_embed": list(bge_m3_ef.encode_documents([doc.page_content])["dense"][0]),
-                "sparse_embed": list(sparse_embedding_func.embed_documents([doc.page_content])[0]),
+                "dense_embed": list(embed_model.embed_documents([doc.page_content])[0]),
+                "sparse_embed": sparse_embed_model.embed_documents([doc.page_content])[0],
                 "text": doc.page_content
             })
         end = time.time()
 
-
-        insert_start_time = time.time() 
-        client.insert(collection_name=collection_name, data=data)
+        # upload embeddings to milvus in batches of 5
+        insert_start_time = time.time()
+        
+        batch_size = batch_size
+        num_batches = ( len(data) + batch_size - 1) // batch_size
+        
+        for i in range(num_batches):
+            start_idx = i * batch_size
+            end_idx = min((i + 1) * batch_size, len(data))
+            batch_embeddings = data[start_idx:end_idx]
+            
+            client.insert(collection_name=collection_name, data=batch_embeddings)
+            
+            logger.info(f"INSERTED {client.get_collection_stats(collection_name = collection_name)['rows']} vectors")
+        
         insert_end_time = time.time()
 
         logger.info(f"Added {len(documents)} documents to collection {collection_name}")
@@ -133,13 +149,13 @@ def add_documents_to_collection(collection_name, client, documents, embed_model,
             }
 
 # Convert collection into retriever
-def convert_collection_to_retriever(collection_name, client, embed_model, sparse_embed_model, k=3):
+def convert_collection_to_retriever(collection_name, env_vars, embed_model, sparse_embed_model, k=3):
     '''
     Converts a Milvus collection into a retriever.
 
     Args:
         collection_name: The name of the Milvus collection.
-        client: The MilvusClient object.
+        env_vars: environment variables.
         embed_model: The model used to generate dense embeddings.
         sparse_embed_model: The model used to generate sparse embeddings.
         k: The number of documents to retrieve.
@@ -148,18 +164,21 @@ def convert_collection_to_retriever(collection_name, client, embed_model, sparse
         A retriever object.
     '''
    
-    sparse_search_params = {"metric_type": "IP"}
+    # sparse_search_params = {"metric_type": "IP"}
     dense_search_params = {"metric_type": "COSINE", "params": {}}
+
+    connections.connect(alias="default", uri=env_vars['MILVUS_URI'])
     
     try:
 
         retriever = MilvusCollectionHybridSearchRetriever(
             collection=Collection(collection_name),
-            anns_fields=[dense_embed, sparse_embed],
+            anns_fields=['dense_embed', ], # 'sparse_embed'
             field_embeddings=[embed_model, sparse_embed_model],
-            field_search_params=[dense_search_params, sparse_search_params],
-            text_field=text,
+            field_search_params=[dense_search_params, ], # sparse_search_params
+            text_field='text',
             top_k=k,
+            rerank = RRFRanker(k=60)
         )
 
         logger.info(f"CONVERTED Collection with name {collection_name} into retriever")

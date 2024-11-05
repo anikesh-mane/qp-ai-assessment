@@ -1,5 +1,6 @@
 import time
 import sys
+import shutil
 
 from logger import logger
 from exception import AppException
@@ -14,14 +15,24 @@ from langchain_milvus.retrievers import MilvusCollectionHybridSearchRetriever
 
 
 #Create vector store instance
-def create_milvus(db_uri="./milvus_demo.db"):
+def create_milvus(db_uri="./milvus_demo.db", make_new_db=False):
     '''
     Creates a Milvus client.
 
     Returns:
         A MilvusClient object.
     '''
+
+    parent_dir = os.path.dirname(db_uri)
+
+    if make_new_db and os.path.exists(parent_dir):
+        shutil.rmtree(parent_dir) 
+    
+    os.makedirs(parent_dir, exist_ok=True)
+
     client = MilvusClient(uri=db_uri)
+
+    
 
     logger.info("CREATED Milvus client")
 
@@ -131,7 +142,7 @@ def add_documents_to_collection(collection_name, client, documents, embed_model,
             
             client.insert(collection_name=collection_name, data=batch_embeddings)
             
-            logger.info(f"INSERTED {client.get_collection_stats(collection_name = collection_name)['rows']} vectors")
+            logger.info(f"INSERTED {client.get_collection_stats(collection_name = collection_name)['row_count']} vectors")
         
         insert_end_time = time.time()
 
@@ -164,18 +175,18 @@ def convert_collection_to_retriever(collection_name, env_vars, embed_model, spar
         A retriever object.
     '''
    
-    # sparse_search_params = {"metric_type": "IP"}
+    sparse_search_params = {"metric_type": "IP"}
     dense_search_params = {"metric_type": "COSINE", "params": {}}
 
-    connections.connect(alias="default", uri=env_vars['MILVUS_URI'])
+    connections.connect(alias="default", uri=env_vars['MILVUS_LOCAL_URI'])
     
     try:
 
         retriever = MilvusCollectionHybridSearchRetriever(
             collection=Collection(collection_name),
-            anns_fields=['dense_embed', ], # 'sparse_embed'
+            anns_fields=['dense_embed','sparse_embed'], # 
             field_embeddings=[embed_model, sparse_embed_model],
-            field_search_params=[dense_search_params, ], # sparse_search_params
+            field_search_params=[dense_search_params, sparse_search_params], # 
             text_field='text',
             top_k=k,
             rerank = RRFRanker(k=60)

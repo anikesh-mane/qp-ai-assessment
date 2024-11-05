@@ -8,7 +8,7 @@ from utils.util import save_uploaded_file
 
 from extraction.pdf import langchain_pdf_loader
 from databases.milvus import create_or_load_collection, add_documents_to_collection
-from ai_models.embedding import load_bge_embed_func, load_sparse_embedding_func
+from ai_models.embedding import load_hf_embed_func, load_sparse_embedding_func
 
 from fastapi import APIRouter, UploadFile, Request, HTTPException, File, Form
 from pydantic import BaseModel
@@ -60,16 +60,16 @@ async def upload_file(request: Request,
                                          )
         logger.info("File chunked")
 
-        # Create a sparse embedding functions
-        sparse_embed = load_sparse_embedding_func(documents)
-        request.app.sparse_embed = sparse_embed
-
         # initialize milvus collection
         collection_status = create_or_load_collection(collection_name = upload_req.collection_name, 
                                                         client = request.app.milvus_client, 
                                                         embed_dim = request.app.embed_dim
                                                         )
         logger.info(collection_status)
+
+        # Create a sparse embedding functions
+        sparse_embed = load_sparse_embedding_func(documents)
+        request.app.sparse_embed = sparse_embed
         
         # Push the documents and embeddings to collection
         status = add_documents_to_collection(collection_name = upload_req.collection_name, 
@@ -99,4 +99,5 @@ def get_collections(request: Request):
 @router.get('/delete_collection/{collection_name}')
 def delete_collection(collection_name: str, request: Request):
     request.app.milvus_client.drop_collection(collection_name)
-    return {"message": "Collection deleted successfully!"}
+    return {"message": "Collection deleted successfully!",
+            "collections": request.app.milvus_client.list_collections()}

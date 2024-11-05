@@ -3,7 +3,6 @@ import sys
 from logger import logger
 from exception import AppException
 
-import PyPDF2
 from langchain.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 

@@ -37,7 +37,7 @@ from langchain_milvus.utils.sparse import BM25SparseEmbedding
     
 #     return bge_m3_ef, embed_dim
 
-def load_hf_bge_embed_func(model_name='BAAI/bge-m3', device='cpu'):
+def load_hf_embed_func(model_name='BAAI/bge-m3', device='cpu'):
     '''
     Create a BGE-M3 embedding function.
 
@@ -95,7 +95,7 @@ def load_sparse_embedding_func(data):
 
     text = []
     for doc in data:
-        text.append(doc.page_contents)
+        text.append(doc.page_content)
     
     try:
         sparse_embedding_func = BM25SparseEmbedding(corpus=text)
